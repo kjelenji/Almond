@@ -1,0 +1,11 @@
+{
+  "name": "Almond",
+  "description": "Making web browsing easy and simple.",
+  "version": "1.0",
+  "manifest_version": 3,
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": "almond.png"
+  },
+  "permissions": ["activeTab", "storage"]
+}

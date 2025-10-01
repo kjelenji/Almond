@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Popup</title>
+    <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+    <div class="toolbar">
+        <div class="zoom-wrapper">
+            <button id="zoom-toggle" aria-haspopup="true" aria-expanded="false" aria-controls="zoom-panel">Z▾</button>
+            <div id="zoom-panel" class="zoom-panel" hidden>
+                <div class="controls">
+                    <button id="zoom-out" title="Zoom out" aria-label="Zoom out">−</button>
+                    <input id="zoom-slider" type="range" min="50" max="200" step="5" value="100" aria-label="Zoom level">
+                    <button id="zoom-in" title="Zoom in" aria-label="Zoom in">+</button>
+                    <button id="zoom-reset" title="Reset zoom" aria-label="Reset zoom">Reset</button>
+                    <span id="zoom-label">100%</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="popup.js"></script>
+</body>
+</html>
