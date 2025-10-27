@@ -1,0 +1,39 @@
+{
+  "name": "Almond",
+  "description": "Making web browsing easy and simple.",
+  "version": "1.0",
+  "manifest_version": 3,
+  "action": {
+    "default_title": "Almond",
+    "default_popup": "popup.html"
+    
+  },
+  "permissions": ["activeTab", "storage", "geolocation", "notifications", "tabs", "scripting", "downloads", "aiRewriterOriginTrial", "aiLanguageModelOriginTrial"],
+  "host_permissions": ["<all_urls>"],
+  "trial_tokens": [
+    "A756NI1RM0WQrIURUiQbtFiH5JIifpTnmEbfZTtzwGx75pqADqkFzA2vhKtC/P2wCpS3le2SevD2Qqz+XjE69gUAAACCeyJvcmlnaW4iOiJjaHJvbWUtZXh0ZW5zaW9uOi8va29oYXBhYmJvY2NnYWxsYW5uYWRoZGtiY2VkYWRmYW0iLCJmZWF0dXJlIjoiQUlSZXdyaXRlckFQSSIsImV4cGlyeSI6MTc2OTQ3MjAwMCwiaXNUaGlyZFBhcnR5Ijp0cnVlfQ==",
+    "A9dOU8bW74j5yiNdfeFlpkPlPpCnbblZffpsjdaqpdcq8GRQ0/dpbkX5bn0n+QkJq3eq7PGiI8MBTW4wqrYjQwAAAACPeyJvcmlnaW4iOiJjaHJvbWUtZXh0ZW5zaW9uOi8va29oYXBhYmJvY2NnYWxsYW5uYWRoZGtiY2VkYWRmYW0iLCJmZWF0dXJlIjoiQUlQcm9tcHRBUElNdWx0aW1vZGFsSW5wdXQiLCJleHBpcnkiOjE3NzQzMTA0MDAsImlzVGhpcmRQYXJ0eSI6dHJ1ZX0="
+  ],
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content-font-injector.js", "content-simple.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "icons": {
+   "16": "images/almond.png",
+   "32": "images/almond.png",
+   "48": "images/almond.png",
+   "128": "images/almond.png"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["images/*"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}
