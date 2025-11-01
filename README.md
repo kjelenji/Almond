@@ -28,6 +28,7 @@ A Chrome extension that provides accessibility features for older adults (65+) a
    Writer API for Gemini Nano
    Rewriter API for Gemini Nano
    Proofreader API for Gemini Nano
+6. Add Rewriter and Prompt Tokens from https://developer.chrome.com/origintrials
    
 ## Usage
 
