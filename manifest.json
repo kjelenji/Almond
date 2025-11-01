@@ -8,20 +8,17 @@
     "default_popup": "popup.html"
     
   },
-  "permissions": ["activeTab", "storage", "geolocation", "notifications", "tabs", "scripting", "downloads", "aiRewriterOriginTrial", "aiLanguageModelOriginTrial"],
+  "permissions": ["activeTab", "storage", "geolocation", "notifications", "tabs", "scripting", "downloads", "ai"],
   "host_permissions": ["<all_urls>"],
   "trial_tokens": [
   ],
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["content-font-injector.js", "content-simple.js"],
+      "js": ["scripts/content-font-injector.js", "scripts/content-simple.js"],
       "run_at": "document_idle"
     }
   ],
-  "background": {
-    "service_worker": "background.js"
-  },
   "icons": {
    "16": "images/almond.png",
    "32": "images/almond.png",
