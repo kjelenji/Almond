@@ -1,5 +1,5 @@
-
-# Almond <img width="1056" height="992" alt="almond" src="https://github.com/user-attachments/assets/83f980b1-ccfe-4c75-a71b-a4028564ee74" />
+<img width="1056" height="992" alt="almond" src="https://github.com/user-attachments/assets/83f980b1-ccfe-4c75-a71b-a4028564ee74" />
+# Almond 
 
 
 A Chrome extension that provides accessibility features for older adults (65+) and AI-powered assistance through a floating navigation interface.
