@@ -160,9 +160,16 @@
             handleSpeechControl(message.command, sendResponse);
             return true; // Async handler
         }
+<<<<<<<< HEAD:scripts/content-injector.js
         if (message.type === 'reset-font') {
             handleResetFont(sendResponse);
             return true; // Async handler
+========
+        if (message.type === 'speech-control') { 
+            console.log('[SPEECH] Received speech-control message:', message);
+            handleSpeechControl(message.command, sendResponse); 
+            return true;
+>>>>>>>> 7b64b47cd70e24e2d574aee96ad3592df757618d:scripts/content-font-injector.js
         }
         if (message.type === 'manual-guide') {
             handleManualGuide(sendResponse);
@@ -891,6 +898,7 @@ Note: For specific instructions, try asking about particular topics like "email,
             let isSelection = false;
 
             if (selection?.trim()) {
+<<<<<<<< HEAD:scripts/content-injector.js
                 text = selection.trim(); // Use selected text
                 isSelection = true;
                 console.log('[SPEECH] Speaking selected text:', text.substring(0, 100) + '...');
@@ -900,11 +908,26 @@ Note: For specific instructions, try asking about particular topics like "email,
             }
 
             // Limit text length based on whether it's a selection or full page
+========
+                text = selection.trim();
+                isSelection = true;
+                console.log('[SPEECH] Speaking selected text:', text.substring(0, 100) + '...');
+            } else {
+                text = document.body?.innerText || '';
+                console.log('[SPEECH] No selection found, speaking full page content');
+            }
+
+            // Limit text length more intelligently
+>>>>>>>> 7b64b47cd70e24e2d574aee96ad3592df757618d:scripts/content-font-injector.js
             const lines = text.split('\n');
             let truncated;
 
             if (isSelection) {
+<<<<<<<< HEAD:scripts/content-injector.js
                 // For user selections, allow more content (up to 500 lines)
+========
+                // For selections, allow more lines (up to 500)
+>>>>>>>> 7b64b47cd70e24e2d574aee96ad3592df757618d:scripts/content-font-injector.js
                 truncated = lines.slice(0, 500).join('\n');
             } else {
                 // For full page, limit to 300 lines
