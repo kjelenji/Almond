@@ -149,18 +149,22 @@ body {
 
 /* Navigation Buttons */
 .nav-button {
-    width: 40px;
-    height: 40px;
     border: none;
     background: transparent;
-    border-radius: 20px;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     transition: all 0.2s ease;
     position: relative;
-    margin: 0 5px;
+    margin: 0 auto;
+}
+
+/* Large button size (for all navigation buttons) */
+.nav-button.large {
+    width: 52px;
+    height: 52px;
+    border-radius: 26px;
 }
 
 .nav-button:hover {
@@ -2014,6 +2018,7 @@ p {
     z-index: 10000;
     font-family: var(--font-family);
     overflow: hidden;
+    -webkit-backdrop-filter: blur(15px);
     backdrop-filter: blur(15px);
 }
 

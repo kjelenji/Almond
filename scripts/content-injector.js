@@ -1,8 +1,13 @@
-// content-font-injector.js
-// Fallback content script: reads saved font from storage/localStorage and applies it to the page.
+// content-injector.js - Core content script for font, speech, and accessibility features
+// Handles font application, button enlargement, speech synthesis, and other page modifications
 (function(){
+    /**
+     * Applies font settings to page elements
+     * @param {object} opts - Font options (family, color, size, lineHeight, backgroundColor, buttonScale)
+     */
     function applyFontObj(opts){
         try{
+            // Apply font settings to common text elements
             const selector = 'p, li, span, a, label, input, textarea, h1, h2, h3, h4, h5, h6';
             const els = document.querySelectorAll(selector);
             for (const el of els){
@@ -11,29 +16,35 @@
                 el.style.fontSize = opts.size;
                 el.style.lineHeight = opts.lineHeight;
             }
+
+            // Apply to document body with special handling
             if (document.body){
-                document.body.style.fontFamily = opts.family;
-                document.body.style.color = opts.color;
+                document.body.style.fontFamily = opts.family; // Apply font family to body
+                document.body.style.color = opts.color; // Apply text color to body
                 if (opts.backgroundColor) {
-                    document.body.style.backgroundColor = opts.backgroundColor;
+                    document.body.style.backgroundColor = opts.backgroundColor; // Optional background color
                 }
+                // Only increase body font size if desired size is larger than current
                 const current = window.getComputedStyle(document.body).fontSize || '';
                 const curNum = parseFloat(current) || 0;
                 const desired = parseFloat(opts.size) || 0;
                 if(desired && curNum < desired) document.body.style.fontSize = opts.size;
-                document.body.style.lineHeight = opts.lineHeight;
+                document.body.style.lineHeight = opts.lineHeight; // Apply line height
             }
 
-            // Apply button and widget enlargement
+            // Apply button enlargement if scale is specified and not 100%
             if (opts.buttonScale && opts.buttonScale !== 100) {
                 applyButtonEnlargement(opts.buttonScale);
             }
 
-            console.debug?.('content-font-injector applied font', opts);
-        }catch(err){ console.error('content-font-injector error', err); }
+            console.debug?.('content-injector applied font settings', opts);
+        }catch(err){ console.error('content-injector error applying font', err); }
     }
 
-    // Function to enlarge buttons and interactive widgets
+    /**
+     * Enlarges buttons and interactive elements for better accessibility
+     * @param {number} scale - Scale percentage (e.g., 150 for 150% size)
+     */
     function applyButtonEnlargement(scale) {
         try {
             const scaleMultiplier = scale / 100;
@@ -125,34 +136,43 @@
     // Listen for messages from the popup to apply a font immediately or speak text
     chrome.runtime.onMessage.addListener(onRuntimeMessage);
 
+    /**
+     * Handles messages from the popup and other extension components
+     * Routes messages to appropriate handler functions based on message type
+     * @param {object} message - The message object from sender
+     * @param {object} sender - Information about the message sender
+     * @param {function} sendResponse - Function to send response back to sender
+     */
     function onRuntimeMessage(message, sender, sendResponse){
-        if (!message) return false;
-        
-        if (message.type === 'apply-font' && message.font) { 
-            handleApplyFont(message.font, sendResponse); 
-            return true;
+        if (!message) return false; // Ignore empty messages
+
+        // Route messages to appropriate handlers
+        if (message.type === 'apply-font' && message.font) {
+            handleApplyFont(message.font, sendResponse);
+            return true; // Indicates async response
         }
-        if (message.type === 'speak-selection') { 
-            handleSpeakSelection(message.opts || {}, sendResponse); 
+        if (message.type === 'speak-selection') {
+            handleSpeakSelection(message.opts || {}, sendResponse);
+            return true; // Async handler for speech
+        }
+        if (message.type === 'speech-control') {
+            console.log('[SPEECH] Received speech-control message:', message);
+            handleSpeechControl(message.command, sendResponse);
             return true; // Async handler
         }
-        if (message.type === 'speech-control') { 
-            handleSpeechControl(message.action, sendResponse); 
-            return true;
+        if (message.type === 'reset-font') {
+            handleResetFont(sendResponse);
+            return true; // Async handler
         }
-        if (message.type === 'reset-font') { 
-            handleResetFont(sendResponse); 
-            return true;
-        }
-        if (message.type === 'manual-guide') { 
-            handleManualGuide(sendResponse); 
-            return true;
+        if (message.type === 'manual-guide') {
+            handleManualGuide(sendResponse);
+            return true; // Async handler
         }
         if (message.type === 'ask-guide') {
             handleAskGuide(message.question, sendResponse);
-            return true;
+            return true; // Async handler
         }
-        if (message.type === 'manual-highlight') { 
+        if (message.type === 'manual-highlight') {
             console.log('[CONTENT] Received manual-highlight message');
             handleManualHighlight(sendResponse); 
             return true;
@@ -858,14 +878,50 @@ Note: For specific instructions, try asking about particular topics like "email,
             return true;
         }
 
+    /**
+     * Handles text-to-speech requests for selected text or entire page content
+     * @param {object} opts - Speech options (rate, etc.)
+     * @param {function} sendResponse - Function to send response back to caller
+     */
     async function handleSpeakSelection(opts, sendResponse){
         try{
+            // Get selected text or fallback to page content
             const selection = window.getSelection ? window.getSelection().toString() : '';
             let text = '';
-            if (selection?.trim()) text = selection.trim();
-            else if (document.body?.innerText) text = document.body.innerText.trim();
-            const truncated = text.split('\n').slice(0,300).join('\n'); // keep speech short by default
-            
+            let isSelection = false;
+
+            if (selection?.trim()) {
+                text = selection.trim(); // Use selected text
+                isSelection = true;
+                console.log('[SPEECH] Speaking selected text:', text.substring(0, 100) + '...');
+            } else {
+                text = document.body?.innerText || ''; // Fallback to full page content
+                console.log('[SPEECH] No selection found, speaking full page content');
+            }
+
+            // Limit text length based on whether it's a selection or full page
+            const lines = text.split('\n');
+            let truncated;
+
+            if (isSelection) {
+                // For user selections, allow more content (up to 500 lines)
+                truncated = lines.slice(0, 500).join('\n');
+            } else {
+                // For full page, limit to 300 lines
+                truncated = lines.slice(0, 300).join('\n');
+            }
+
+            // Clean up the text
+            truncated = truncated.trim();
+
+            if (!truncated) {
+                sendResponse({ok: false, error: 'No readable text found to speak'});
+                return true;
+            }
+
+            // Show feedback about what's being spoken
+            showSpeechFeedback(isSelection, truncated.length);
+
             // Translate text if a target language is specified
             if (opts.translateTo && opts.translateTo !== 'en-US') {
                 const translatedText = await translateText(truncated, opts.translateTo);
@@ -873,16 +929,14 @@ Note: For specific instructions, try asking about particular topics like "email,
             } else {
                 speakText(truncated, opts);
             }
-            
+
             sendResponse({ok:true});
-        }catch(err){ 
+        }catch(err){
             console.error('Speech error:', err);
-            sendResponse({ok:false, error:String(err)}); 
+            sendResponse({ok:false, error:String(err)});
         }
         return true;
-    }
-
-    // Translation function for content script
+    }    // Translation function for content script
     async function translateText(text, targetLang) {
         try {
             // Remove region code for translation (e.g., 'en-US' -> 'en')
@@ -963,11 +1017,24 @@ Note: For specific instructions, try asking about particular topics like "email,
 
     function handleSpeechControl(action, sendResponse){
         try{
-            if(action === 'stop') window.speechSynthesis.cancel();
+            console.log('[SPEECH] handleSpeechControl called with action:', action);
+            console.log('[SPEECH] speechSynthesis state:', {
+                speaking: window.speechSynthesis.speaking,
+                pending: window.speechSynthesis.pending,
+                paused: window.speechSynthesis.paused
+            });
+            if(action === 'stop') {
+                console.log('[SPEECH] Stopping speech synthesis');
+                window.speechSynthesis.cancel();
+                console.log('[SPEECH] After cancel, speaking:', window.speechSynthesis.speaking);
+            }
             else if(action === 'pause') window.speechSynthesis.pause();
             else if(action === 'resume') window.speechSynthesis.resume();
             sendResponse({ok:true});
-        }catch(err){ sendResponse({ok:false, error:String(err)}); }
+        }catch(err){ 
+            console.error('[SPEECH] handleSpeechControl error:', err);
+            sendResponse({ok:false, error:String(err)}); 
+        }
         return true;
     }
 
@@ -1302,7 +1369,11 @@ Note: For specific instructions, try asking about particular topics like "email,
                 .ads,
                 .sidebar,
                 .popup,
-                .modal {
+                .modal,
+                #almond-nav,
+                .almond-panel,
+                [id*="almond"],
+                [class*="almond"] {
                     display: none !important;
                 }
                 img {
@@ -1424,6 +1495,14 @@ Note: For specific instructions, try asking about particular topics like "email,
                 tr {
                     page-break-inside: avoid;
                     page-break-after: auto;
+                }
+                
+                /* Hide extension elements */
+                #almond-nav,
+                .almond-panel,
+                [id*="almond"],
+                [class*="almond"] {
+                    display: none !important;
                 }
             }
         `;
@@ -1560,30 +1639,67 @@ Note: For specific instructions, try asking about particular topics like "email,
         }
     }
     
-    // Show ads again handler
-    function handleShowAds(sendResponse) {
-        try {
-            console.log('[PROTECTION] Showing ads again');
-            
-            const hiddenElements = document.querySelectorAll('[data-almond-hidden="true"]');
-            let restoredCount = 0;
-            
-            hiddenElements.forEach(element => {
-                element.style.display = '';
-                element.removeAttribute('data-almond-hidden');
-                restoredCount++;
-            });
-            
-            const result = restoredCount > 0 
-                ? `Restored ${restoredCount} hidden elements` 
-                : 'No hidden elements to restore';
-            
-            sendResponse({ success: true, result: result });
-            
-        } catch (err) {
-            console.error('[PROTECTION] Show ads error:', err);
-            sendResponse({ success: false, result: 'Could not restore ads' });
-        }
+    // Show speech feedback to user
+    function showSpeechFeedback(isSelection, textLength) {
+        // Remove any existing feedback
+        const existing = document.getElementById('almond-speech-feedback');
+        if (existing) existing.remove();
+
+        // Create feedback notification
+        const feedbackDiv = document.createElement('div');
+        feedbackDiv.id = 'almond-speech-feedback';
+        feedbackDiv.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #007bff;
+            color: white;
+            border-radius: 8px;
+            padding: 12px 16px;
+            z-index: 10000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            max-width: 300px;
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+            animation: slideIn 0.3s ease-out;
+        `;
+
+        const contentType = isSelection ? 'selected text' : 'page content';
+        const charCount = textLength.toLocaleString();
+
+        feedbackDiv.innerHTML = `
+            <div style="font-weight: bold; margin-bottom: 4px;">
+                🔊 Speaking ${contentType}
+            </div>
+            <div style="font-size: 12px; opacity: 0.9;">
+                ${charCount} characters
+            </div>
+        `;
+
+        // Add slide-in animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            @keyframes slideOut {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(100%); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
+
+        document.body.appendChild(feedbackDiv);
+
+        // Auto-remove after 3 seconds
+        setTimeout(() => {
+            const feedback = document.getElementById('almond-speech-feedback');
+            if (feedback) {
+                feedback.style.animation = 'slideOut 0.3s ease-in';
+                setTimeout(() => feedback.remove(), 300);
+            }
+        }, 3000);
     }
     
 })();
