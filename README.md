@@ -1,7 +1,4 @@
 ![Alt text for the image](images/almond_title.png)
-
-# Almond
-
 A Chrome extension that provides accessibility features and AI-powered assistance through a floating navigation interface.
 
 ## Features
