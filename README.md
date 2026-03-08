@@ -1,7 +1,7 @@
 ![Alt text for the image](images/almond_title.png)
 
 
-A Chrome extension that provides accessibility features and AI-powered assistance through a floating navigation interface.
+A Chrome extension that provides accessibility features and AI-powered assistance for older adults (65+) through a floating navigation interface.
 
 ## Features
 
