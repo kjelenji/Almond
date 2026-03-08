@@ -41,9 +41,10 @@ Almond/
 ├── manifest.json          # Extension configuration
 ├── popup.html            # Extension popup interface
 ├── scripts/              # JavaScript files
-│   ├── content-simple.js     # Main content script with all features
-│   ├── content-font-injector.js # Font injection utilities
-│   └── popup.js              # Popup interface logic
+│   ├── content-injector.js      # Content script utilities
+│   ├── content-simple.js        # Main content script with all features
+│   ├── floating_nav.js          # Floating navigation interface
+│   └── popup.js                 # Popup interface logic
 ├── styles/               # CSS files
 │   └── popup.css         # Comprehensive styling
 └── images/               # Icon and image assets
