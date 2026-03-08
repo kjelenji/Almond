@@ -15,7 +15,7 @@
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["scripts/content-font-injector.js", "scripts/content-simple.js"],
+      "js": ["scripts/content-injector.js", "scripts/content-simple.js"],
       "run_at": "document_idle"
     }
   ],
